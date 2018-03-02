@@ -4,6 +4,7 @@ import { isEmpty, isPresent, typeOf, isEqual, isBlank } from '@ember/utils';
 import { scheduleOnce, run } from "@ember/runloop";
 
 export default Component.extend({
+  tagName: null,
   /**
    * Set default values in component init
    */
@@ -115,7 +116,7 @@ export default Component.extend({
 
   placeChanged() {
     let place = this.get('autocomplete').getPlace();
-    this._callCallback('placeChangedCallback', place);
+    this._callCallback('place-changed', place);
 
     if (place[this.get('setValueWithProperty')] !== undefined) {
       this.set('value', place[this.get('setValueWithProperty')]);
@@ -126,15 +127,7 @@ export default Component.extend({
   },
 
   _callCallback(callback, place) {
-    let callbackFn = this.get(callback);
-    if (isEqual(typeOf(callbackFn), 'function')) {
-      callbackFn(place);
-    } else {
-      let actionName = this.get(callback);
-      if (isPresent(this.get('handlerController')) && isPresent(actionName)) {
-        this.get('handlerController').send(actionName, place);
-      }
-    }
+    this.get(callback)(place);
   },
 
   _typesToArray() {
@@ -171,9 +164,12 @@ export default Component.extend({
     properties.forEach((property) => input.setAttribute(property, this.get(property)));
   },
 
+  "focus-out"(){},
+  "place-changed"(){},
+
   actions: {
     focusOut() {
-      this._callCallback('focusOutCallback');
+      this._callCallback('focus-out');
     }
   }
 });
