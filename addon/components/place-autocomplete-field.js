@@ -1,5 +1,6 @@
 import layout from '../templates/components/place-autocomplete-field';
 import Component from '@ember/component';
+import { isArray } from '@ember/array';
 import { isEmpty, isPresent, typeOf, isEqual, isBlank } from '@ember/utils';
 import { scheduleOnce, run } from "@ember/runloop";
 
@@ -26,8 +27,8 @@ export default Component.extend({
    * updated options that have been passed into the component.
    */
   didReceiveAttrs() {
-    if (this.get('autocomplete')) {
-      this.get('autocomplete').setOptions(this.getOptions());
+    if (this.autocomplete) {
+      this.autocomplete.setOptions(this.getOptions());
     }
   },
 
@@ -36,7 +37,9 @@ export default Component.extend({
    */
   getOptions() {
     const google = this.get('google') || ((window) ? window.google : null);
-    const options = { types: this._typesToArray() };
+    const placeIdOnly = this.get('placeIdOnly') || false;
+
+    const options = { types: this._typesToArray(), placeIdOnly };
 
     const latLngBnds = this.get('latLngBounds');
 
@@ -63,7 +66,7 @@ export default Component.extend({
       if (this.get('withGeoLocate')) {
         this.geolocateAndSetBounds();
       }
-      this.get('autocomplete').addListener('place_changed', () => {
+      this.autocomplete.addListener('place_changed', () => {
         run(() => {
           this.placeChanged();
         });
@@ -82,16 +85,16 @@ export default Component.extend({
   },
 
   willDestroy() {
-    if (isPresent(this.get('autocomplete'))) {
+    if (isPresent(this.autocomplete)) {
       let google = this.get('google') || ((window) ? window.google : null);
       if(google && google.maps && google.maps.event) {
-        google.maps.event.clearInstanceListeners(this.get('autocomplete'));
+        google.maps.event.clearInstanceListeners(this.autocomplete);
       }
     }
   },
 
   setAutocomplete() {
-    if (isEmpty(this.get('autocomplete'))) {
+    if (isEmpty(this.autocomplete)) {
       const inputElement = document.getElementById(this.elementId).getElementsByTagName('input')[0],
             google = this.get('google') || window.google; //TODO: check how to use the inyected google object
 
@@ -103,7 +106,7 @@ export default Component.extend({
   // @see https://developers.google.com/maps/documentation/javascript/places-autocomplete#set_search_area
   geolocateAndSetBounds() {
     let navigator = this.get('navigator') || ((window) ? window.navigator : null);
-    let autocomplete = this.get('autocomplete');
+    let autocomplete = this.autocomplete;
     if (navigator && navigator.geolocation && isPresent(autocomplete)) {
       navigator.geolocation.getCurrentPosition((position) => {
         const google = this.get('google') || window.google;
@@ -115,14 +118,12 @@ export default Component.extend({
   },
 
   placeChanged() {
-    let place = this.get('autocomplete').getPlace();
+    let place = this.autocomplete.getPlace();
     this._callCallback('place-changed', place);
 
+    // If setValueWithProperty is undefined, use Google Autocomplete default behavior
     if (place[this.get('setValueWithProperty')] !== undefined) {
       this.set('value', place[this.get('setValueWithProperty')]);
-    } else {
-      // Address not found use value
-      this.set('value', place.name);
     }
   },
 
@@ -131,9 +132,20 @@ export default Component.extend({
   },
 
   _typesToArray() {
-    if (this.get('types') !== '') {
-      return this.get('types').split(',');
-    } else {
+    let types = this.get('types');
+
+    if (isArray(types)) {
+      return types;
+    }
+    else if (typeOf(types) === 'string') {
+      if (types.trim() === '') {
+        return [];
+      }
+      else {
+        return types.split(',');
+      }
+    }
+    else {
       return [];
     }
   },
@@ -143,11 +155,11 @@ export default Component.extend({
       layout: layout,
       disabled: false,
       inputClass: 'place-autocomplete--input',
-      types: 'geocode',
+      types: undefined,
       restrictions: {},
       tabindex: 0,
       withGeoLocate: false,
-      setValueWithProperty: 'formatted_address',
+      setValueWithProperty: undefined,
       preventSubmit: false
     };
 

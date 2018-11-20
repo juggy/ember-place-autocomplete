@@ -1,6 +1,6 @@
 {
   "name": "ember-place-autocomplete",
-  "version": "0.2.0",
+  "version": "1.1.1",
   "description": "Ember cli addon to provide a component that uses Google Places API to autocomplete place information when someone writes an address in a text field",
   "directories": {
     "doc": "doc",
@@ -16,7 +16,6 @@
   "author": "Daniel Múnera Sánchez",
   "license": "MIT",
   "dependencies": {
-    "bower": "^1.8.2",
     "ember-cli-babel": "^6.6.0",
     "ember-cli-htmlbars": "^2.0.1"
   },
@@ -26,7 +25,7 @@
     "ember-cli": "~2.18.2",
     "ember-cli-chai": "0.3.1",
     "ember-cli-dependency-checker": "^2.0.0",
-    "ember-cli-dotenv": "^2.0.0",
+    "ember-cli-dotenv": "2.0.0",
     "ember-cli-eslint": "^4.2.1",
     "ember-cli-htmlbars-inline-precompile": "^1.0.0",
     "ember-cli-inject-live-reload": "^1.4.1",
