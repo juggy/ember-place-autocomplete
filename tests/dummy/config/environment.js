@@ -16,7 +16,6 @@ module.exports = function(environment) {
         Date: false
       }
     },
-
     'place-autocomplete': {
       key: process.env.AUTOCOMPLETE_API_KEY
     },
@@ -45,6 +44,10 @@ module.exports = function(environment) {
 
     ENV.APP.rootElement = '#ember-testing';
     ENV.APP.autoboot = false;
+  }
+
+  if (environment === 'production') {
+    ENV.rootURL = '/ember-place-autocomplete/';
   }
 
   return ENV;
