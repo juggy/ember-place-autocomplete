@@ -184,7 +184,6 @@ export default Component.extend({
     properties.forEach((property) => input.setAttribute(property, this.get(property)));
   },
 
-  actions: {
   _removePlacesAutoCompleteContainers() {
     const pacContainers = document.querySelectorAll('.pac-container');
     for (let i = 0; pacContainers.length > i; i++) {
